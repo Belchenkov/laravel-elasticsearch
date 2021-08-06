@@ -3,6 +3,7 @@
 namespace App\Search\Engines;
 
 use Elasticsearch\Client;
+use Illuminate\Support\Arr;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 
@@ -43,7 +44,21 @@ class ElasticSearchEngine extends Engine
 
     public function search(Builder $builder)
     {
-        // TODO: Implement search() method.
+        $params = [
+            'index' => $builder->model->searchableAs(),
+            'type' => $builder->model->searchableAs(),
+            'body' => [
+                'query' => [
+                    'multi_match' => [
+                        'query' => $builder->query,
+                        'fields' => ['username', 'name', 'email'],
+                        'type' => 'phrase_prefix'
+                    ]
+                ]
+            ]
+        ];
+
+        return $this->client->search($params);
     }
 
     public function paginate(Builder $builder, $perPage, $page)
@@ -58,7 +73,16 @@ class ElasticSearchEngine extends Engine
 
     public function map(Builder $builder, $results, $model)
     {
-        // TODO: Implement map() method.
+        if (count($hits = Arr::get($results, 'hits.hits')) === 0) {
+            return $model->newCollection();
+        }
+
+        $hits = Arr::get($results, 'hits.hits');
+
+        return $model->getScoutModelsByIds(
+            $builder,
+            collect($hits)->pluck('_id')->values()->all()
+        );
     }
 
     public function lazyMap(Builder $builder, $results, $model)
