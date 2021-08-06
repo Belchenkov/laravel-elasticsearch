@@ -2,15 +2,29 @@
 
 namespace App\Search\Engines;
 
+use Elasticsearch\Client;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 
 class ElasticSearchEngine extends Engine
 {
 
+    /**
+     * @var Client
+     */
+    protected Client $client;
+
+    /**
+     * @param Client $client
+     */
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+    }
+
     public function update($models)
     {
-
+        dd($this->client);
     }
 
     public function delete($models)
