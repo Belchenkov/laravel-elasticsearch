@@ -26,12 +26,10 @@ class ElasticSearchEngine extends Engine
     public function update($models)
     {
         $models->each(function ($model) {
-            $params = [
-                'index' => $model->searchableAs(),
-                'type' => $model->searchableAs(),
+            $params = $this->getRequestBody($model, [
                 'id' => $model->id,
                 'body' => $model->toSearchableArray()
-            ];
+            ]);
 
             $this->client->index($params);
         });
@@ -40,11 +38,9 @@ class ElasticSearchEngine extends Engine
     public function delete($models)
     {
         $models->each(function ($model) {
-           $params = [
-               'index' => $model->searchableAs(),
-               'type' => $model->searchableAs(),
+           $params = $this->getRequestBody($model, [
                'id' => $model->id,
-           ];
+           ]);
 
            $this->client->delete($params);
         });
@@ -62,9 +58,7 @@ class ElasticSearchEngine extends Engine
      */
     protected function performSearch(Builder $builder, array $options = []): callable|array
     {
-        $params = array_merge_recursive([
-            'index' => $builder->model->searchableAs(),
-            'type' => $builder->model->searchableAs(),
+        $params = array_merge_recursive($this->getRequestBody($builder->model), [
             'body' => [
                 'from' => 0,
                 'size' => 5000,
@@ -128,5 +122,18 @@ class ElasticSearchEngine extends Engine
     public function deleteIndex($name)
     {
         // TODO: Implement deleteIndex() method.
+    }
+
+    /**
+     * @param $model
+     * @param array $options
+     * @return array
+     */
+    protected function getRequestBody($model, array $options = []): array
+    {
+        return array_merge_recursive([
+            'index' => $model->searchableAs(),
+            'type' => $model->searchableAs(),
+        ], $options);
     }
 }
