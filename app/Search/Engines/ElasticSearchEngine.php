@@ -4,6 +4,7 @@ namespace App\Search\Engines;
 
 use Elasticsearch\Client;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Scout\Builder;
 use Laravel\Scout\Engines\Engine;
 
@@ -90,6 +91,12 @@ class ElasticSearchEngine extends Engine
             ->values();
     }
 
+    /**
+     * @param Builder $builder
+     * @param mixed $results
+     * @param \Illuminate\Database\Eloquent\Model $model
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
     public function map(Builder $builder, $results, $model)
     {
         if (count($hits = Arr::get($results, 'hits.hits')) === 0) {
@@ -116,7 +123,13 @@ class ElasticSearchEngine extends Engine
 
     public function flush($model)
     {
-        // TODO: Implement flush() method.
+        $this->client->indices()->delete([
+           'index' => $model->searchableAs()
+        ]);
+
+        Artisan::call('scout:elastic:create', [
+            'model' => get_class($model)
+        ]);
     }
 
     public function createIndex($name, array $options = [])
