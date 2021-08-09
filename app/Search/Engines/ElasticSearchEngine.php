@@ -64,7 +64,7 @@ class ElasticSearchEngine extends Engine
                 'size' => 5000,
                 'query' => [
                     'multi_match' => [
-                        'query' => $builder->query,
+                        'query' => $builder->query ?? '',
                         'fields' => ['username', 'name', 'email'],
                         'type' => 'phrase_prefix'
                     ]
@@ -85,7 +85,9 @@ class ElasticSearchEngine extends Engine
 
     public function mapIds($results)
     {
-        // TODO: Implement mapIds() method.
+        return collect(Arr::get($results, 'hits.hits'))
+            ->pluck('_id')
+            ->values();
     }
 
     public function map(Builder $builder, $results, $model)

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function (\Illuminate\Http\Request $request) {
-    $users = \App\Models\User::search($request->q)->paginate();
+    $users = \App\Models\User::search($request->q)->keys();
 
     dd($users);
 });
