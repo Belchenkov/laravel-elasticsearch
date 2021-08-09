@@ -77,7 +77,10 @@ class ElasticSearchEngine extends Engine
 
     public function paginate(Builder $builder, $perPage, $page)
     {
-        // TODO: Implement paginate() method.
+        return $this->performSearch($builder, [
+            'from' => ($page - 1) * $perPage,
+            'size' => 10
+        ]);
     }
 
     public function mapIds($results)
@@ -106,7 +109,7 @@ class ElasticSearchEngine extends Engine
 
     public function getTotalCount($results)
     {
-        // TODO: Implement getTotalCount() method.
+        return Arr::get($results,'hits.total')['value'];
     }
 
     public function flush($model)
