@@ -39,7 +39,15 @@ class ElasticSearchEngine extends Engine
 
     public function delete($models)
     {
-        // TODO: Implement delete() method.
+        $models->each(function ($model) {
+           $params = [
+               'index' => $model->searchableAs(),
+               'type' => $model->searchableAs(),
+               'id' => $model->id,
+           ];
+
+           $this->client->delete($params);
+        });
     }
 
     public function search(Builder $builder)
