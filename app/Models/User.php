@@ -63,4 +63,13 @@ class User extends Authenticatable
             'email' => $this->email
         ];
     }
+
+    public function searchableFields(): array
+    {
+        return [
+            'email',
+            'name',
+            'username'
+        ];
+    }
 }
